@@ -1,0 +1,130 @@
+---
+const songs = [
+  "示例歌曲 01",
+  "示例歌曲 02",
+  "示例歌曲 03",
+  "示例歌曲 04",
+  "示例歌曲 05",
+];
+---
+
+<aside class="space-y-6 lg:sticky lg:top-24 lg:self-start">
+  <section
+    data-calendar
+    class="rounded-[2rem] border border-white/10 bg-slate-900/35 p-5 shadow-xl backdrop-blur-xl"
+  >
+    <div class="flex items-center justify-between gap-3">
+      <h2 class="text-base font-bold text-white">日历</h2>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          data-prev-month
+          class="rounded-lg border border-white/10 bg-black/20 px-2 py-1 text-xs text-slate-300 transition hover:bg-blue-500/20 hover:text-white"
+        >
+          ←
+        </button>
+
+        <span data-calendar-title class="min-w-[110px] text-center text-sm text-slate-300">
+          2026 年 5 月
+        </span>
+
+        <button
+          type="button"
+          data-next-month
+          class="rounded-lg border border-white/10 bg-black/20 px-2 py-1 text-xs text-slate-300 transition hover:bg-blue-500/20 hover:text-white"
+        >
+          →
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-7 gap-1 text-center text-xs text-slate-400">
+      <span>一</span>
+      <span>二</span>
+      <span>三</span>
+      <span>四</span>
+      <span>五</span>
+      <span>六</span>
+      <span>日</span>
+    </div>
+
+    <div data-calendar-grid class="mt-2 grid grid-cols-7 gap-1"></div>
+  </section>
+
+  <section class="rounded-[2rem] border border-white/10 bg-slate-900/35 p-5 shadow-xl backdrop-blur-xl">
+    <div class="flex items-center justify-between">
+      <h2 class="text-base font-bold text-white">音乐播放器</h2>
+      <span class="text-xs text-slate-400">Playlist</span>
+    </div>
+
+    <select class="mt-4 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-2 text-sm text-slate-200 outline-none">
+      {songs.map((song) => (
+        <option>{song}</option>
+      ))}
+    </select>
+
+    <audio class="mt-4 w-full" controls></audio>
+  </section>
+</aside>
+
+<script>
+  const calendarRoot = document.querySelector("[data-calendar]");
+
+  if (calendarRoot) {
+    const titleEl = calendarRoot.querySelector("[data-calendar-title]");
+    const gridEl = calendarRoot.querySelector("[data-calendar-grid]");
+    const prevBtn = calendarRoot.querySelector("[data-prev-month]");
+    const nextBtn = calendarRoot.querySelector("[data-next-month]");
+
+    const current = new Date();
+    current.setDate(1);
+
+    function renderCalendar() {
+      const year = current.getFullYear();
+      const month = current.getMonth();
+
+      if (titleEl) {
+        titleEl.textContent = `${year} 年 ${month + 1} 月`;
+      }
+
+      if (!gridEl) return;
+
+      gridEl.innerHTML = "";
+
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const startOffset = (firstDay.getDay() + 6) % 7;
+
+      for (let i = 0; i < startOffset; i++) {
+        const emptyCell = document.createElement("div");
+        emptyCell.className = "h-10";
+        gridEl.appendChild(emptyCell);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateString = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+        const dayLink = document.createElement("a");
+        dayLink.href = `/archive?date=${dateString}`;
+        dayLink.textContent = String(day);
+        dayLink.className =
+          "flex h-10 items-center justify-center rounded-lg bg-black/20 text-xs text-slate-200 transition hover:bg-blue-500/30 hover:text-white";
+
+        gridEl.appendChild(dayLink);
+      }
+    }
+
+    prevBtn?.addEventListener("click", () => {
+      current.setMonth(current.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      current.setMonth(current.getMonth() + 1);
+      renderCalendar();
+    });
+
+    renderCalendar();
+  }
+</script>

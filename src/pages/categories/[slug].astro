@@ -1,0 +1,94 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostStrip from "../../components/PostStrip.astro";
+import { siteConfig } from "../../data/site.ts";
+
+import {
+  getPublishedPosts,
+  getPostUrl,
+  getCategoryLabel,
+  formatPostDate,
+} from "../../lib/posts.ts";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+
+  return siteConfig.categories.map((category) => ({
+    params: { slug: category.slug },
+    props: {
+      category,
+      posts: posts.filter((post) => post.data.category === category.slug),
+    },
+  }));
+}
+
+const { category, posts } = Astro.props;
+---
+
+<BaseLayout title={`${category.title} | d0ucube`}>
+  <main class="mx-auto max-w-7xl px-4 py-10">
+    <section class="rounded-[2rem] border border-white/10 bg-slate-950/35 p-6 shadow-2xl backdrop-blur-2xl md:p-8">
+      <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_285px]">
+        <section>
+          <div class="mb-6 border-b border-white/10 pb-5">
+            <p class="text-xs uppercase tracking-[0.35em] text-blue-200/70">
+              d0ucube category
+            </p>
+
+            <h1 class="mt-3 text-4xl font-black text-white">
+              {category.title}
+            </h1>
+
+            <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-300">
+              {category.description}
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            {posts.length > 0 ? (
+              posts.map((post) => (
+                <PostStrip
+                  title={post.data.title}
+                  description={post.data.description}
+                  category={getCategoryLabel(post.data.category)}
+                  date={formatPostDate(post.data.pubDate)}
+                  href={getPostUrl(post)}
+                  variant="dark"
+                />
+              ))
+            ) : (
+              <div class="rounded-[1.6rem] border border-white/10 bg-slate-950/45 p-6 text-sm text-slate-300 shadow-xl backdrop-blur-2xl">
+                这个分类下暂时还没有文章。
+              </div>
+            )}
+          </div>
+        </section>
+
+        <aside class="space-y-5">
+          <section class="rounded-[1.8rem] border border-white/10 bg-slate-950/45 p-5 shadow-xl backdrop-blur-2xl">
+            <h2 class="text-lg font-black text-white">标签</h2>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              {siteConfig.tags.slice(0, 8).map((tag) => (
+                <a
+                  href={`/search?q=${tag}`}
+                  class="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 transition hover:border-blue-300/60 hover:bg-blue-500/15"
+                >
+                  #{tag}
+                </a>
+              ))}
+            </div>
+          </section>
+
+          <section class="rounded-[1.8rem] border border-white/10 bg-slate-950/45 p-5 shadow-xl backdrop-blur-2xl">
+            <h2 class="text-lg font-black text-white">分类说明</h2>
+
+            <p class="mt-3 text-sm leading-7 text-slate-300">
+              这里会展示当前分类下的所有文章。文章来自 src/content/blog。
+            </p>
+          </section>
+        </aside>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

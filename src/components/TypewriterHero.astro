@@ -1,0 +1,120 @@
+---
+import { siteConfig } from "../data/site.ts";
+
+const avatarBackground = `url('/images/hero-bg.jpg')`;
+---
+
+<section id="top-hero" class="mx-auto max-w-7xl px-4 py-8 md:py-10">
+  <div class="rounded-[2rem] border border-white/10 bg-slate-950/35 p-7 shadow-2xl backdrop-blur-2xl md:p-9">
+    <div class="flex flex-col items-center text-center">
+      <p class="mb-4 text-xs uppercase tracking-[0.45em] text-blue-200">
+        {siteConfig.domain}
+      </p>
+
+      <div
+        class="mb-5 h-24 w-24 rounded-full border-4 border-white/15 shadow-2xl md:h-28 md:w-28"
+        style={`background-image: ${avatarBackground}; background-size: 240%; background-position: center 18%;`}
+      ></div>
+
+      <h1 class="min-h-10 text-center text-xl font-black leading-tight text-white md:text-3xl">
+        <span data-typewriter data-text={siteConfig.typewriterText}></span>
+        <span data-cursor class="hidden animate-pulse text-blue-300">|</span>
+      </h1>
+    </div>
+  </div>
+</section>
+
+<script>
+  const el = document.querySelector("[data-typewriter]");
+  const cursor = document.querySelector("[data-cursor]");
+  const hero = document.querySelector("#top-hero");
+
+  let timer;
+  let isTyping = false;
+  let isVisible = false;
+
+  function clearTypewriter() {
+    if (!el) return;
+
+    if (timer) {
+      clearInterval(timer);
+      timer = undefined;
+    }
+
+    el.textContent = "";
+    cursor?.classList.add("hidden");
+    isTyping = false;
+  }
+
+  function playTypewriter() {
+    if (!el || isTyping) return;
+
+    const text = el.getAttribute("data-text") || "";
+
+    clearTypewriter();
+
+    cursor?.classList.remove("hidden");
+    isTyping = true;
+
+    let index = 0;
+
+    timer = window.setInterval(() => {
+      el.textContent = text.slice(0, index + 1);
+      index += 1;
+
+      if (index >= text.length) {
+        clearInterval(timer);
+        timer = undefined;
+        isTyping = false;
+      }
+    }, 120);
+  }
+
+  function checkHeroVisible() {
+    if (!hero) return false;
+
+    const rect = hero.getBoundingClientRect();
+
+    return rect.bottom > 0 && rect.top < window.innerHeight * 0.75;
+  }
+
+  function handleVisibility() {
+    const currentlyVisible = checkHeroVisible();
+
+    if (currentlyVisible && !isVisible) {
+      isVisible = true;
+      playTypewriter();
+    }
+
+    if (!currentlyVisible && isVisible) {
+      isVisible = false;
+      clearTypewriter();
+    }
+  }
+
+  clearTypewriter();
+
+  if (hero) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          isVisible = true;
+          playTypewriter();
+        } else {
+          isVisible = false;
+          clearTypewriter();
+        }
+      },
+      {
+        threshold: 0.25,
+      }
+    );
+
+    observer.observe(hero);
+
+    window.addEventListener("scroll", handleVisibility, { passive: true });
+    window.addEventListener("resize", handleVisibility);
+
+    requestAnimationFrame(handleVisibility);
+  }
+</script>

@@ -1,0 +1,158 @@
+---
+import { getCollection } from "astro:content";
+
+const posts = await getCollection("blog", ({ data }) => data.draft !== true);
+
+function toDateKey(value: string | Date) {
+  const date = new Date(value);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getPostUrl(post: any) {
+  const slug = post.slug ?? post.id.replace(/\.(md|mdx)$/i, "");
+  return `/posts/${slug}/`;
+}
+
+const dateMap: Record<string, any[]> = {};
+
+for (const post of posts) {
+  const key = toDateKey(post.data.date);
+  if (!dateMap[key]) dateMap[key] = [];
+
+  dateMap[key].push({
+    title: post.data.title,
+    url: getPostUrl(post),
+    category: post.data.category ?? post.id.split("/")[0],
+  });
+}
+
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentMonth = now.getMonth() + 1;
+---
+
+<section
+  class="article-calendar-card"
+  data-date-map={JSON.stringify(dateMap)}
+  data-year={currentYear}
+  data-month={currentMonth}
+>
+  <div class="calendar-top">
+    <h2>日历</h2>
+
+    <div class="calendar-controls">
+      <button type="button" data-calendar-prev aria-label="上个月">←</button>
+      <span data-calendar-title></span>
+      <button type="button" data-calendar-next aria-label="下个月">→</button>
+    </div>
+  </div>
+
+  <div class="calendar-week">
+    <span>日</span>
+    <span>一</span>
+    <span>二</span>
+    <span>三</span>
+    <span>四</span>
+    <span>五</span>
+    <span>六</span>
+  </div>
+
+  <div class="calendar-grid" data-calendar-grid></div>
+
+  <p class="calendar-tip">有发光标记的日期表示当天有文章。</p>
+</section>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector(".article-calendar-card");
+    if (!root) return;
+
+    const dateMap = JSON.parse(root.dataset.dateMap || "{}");
+    let year = Number(root.dataset.year);
+    let month = Number(root.dataset.month);
+
+    const title = root.querySelector("[data-calendar-title]");
+    const grid = root.querySelector("[data-calendar-grid]");
+    const prev = root.querySelector("[data-calendar-prev]");
+    const next = root.querySelector("[data-calendar-next]");
+
+    function pad(num) {
+      return String(num).padStart(2, "0");
+    }
+
+    function dateKey(y, m, d) {
+      return `${y}-${pad(m)}-${pad(d)}`;
+    }
+
+    function renderCalendar() {
+      title.textContent = `${year} 年 ${month} 月`;
+      grid.innerHTML = "";
+
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("span");
+        empty.className = "calendar-day calendar-empty";
+        grid.appendChild(empty);
+      }
+
+      const today = new Date();
+      const todayKey = dateKey(
+        today.getFullYear(),
+        today.getMonth() + 1,
+        today.getDate()
+      );
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const key = dateKey(year, month, day);
+        const posts = dateMap[key] || [];
+        const hasPosts = posts.length > 0;
+
+        const el = document.createElement(hasPosts ? "a" : "span");
+        el.className = "calendar-day";
+
+        if (hasPosts) {
+          el.classList.add("has-posts");
+          el.href = `/dates/${key}/`;
+          el.title = `${posts.length} 篇文章`;
+          el.setAttribute("aria-label", `${key} 有 ${posts.length} 篇文章`);
+        }
+
+        if (key === todayKey) {
+          el.classList.add("is-today");
+        }
+
+        el.innerHTML = `
+          <span class="calendar-number">${day}</span>
+          ${hasPosts ? `<span class="calendar-dot">${posts.length}</span>` : ""}
+        `;
+
+        grid.appendChild(el);
+      }
+    }
+
+    prev.addEventListener("click", () => {
+      month -= 1;
+      if (month < 1) {
+        month = 12;
+        year -= 1;
+      }
+      renderCalendar();
+    });
+
+    next.addEventListener("click", () => {
+      month += 1;
+      if (month > 12) {
+        month = 1;
+        year += 1;
+      }
+      renderCalendar();
+    });
+
+    renderCalendar();
+  })();
+</script>

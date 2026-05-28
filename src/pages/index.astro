@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TypewriterHero from "../components/TypewriterHero.astro";
+import LeftSidebar from "../components/LeftSidebar.astro";
+import CategoryGrid from "../components/CategoryGrid.astro";
+import RightPlugins from "../components/RightPlugins.astro";
+import PostStrip from "../components/PostStrip.astro";
+
+import {
+  getPublishedPosts,
+  getPostUrl,
+  getCategoryLabel,
+  formatPostDate,
+} from "../lib/posts.ts";
+
+const latestPosts = (await getPublishedPosts()).slice(0, 3);
+---
+
+<BaseLayout title="d0ucube | 个人博客">
+  <TypewriterHero />
+
+  <main class="mx-auto grid max-w-7xl gap-5 px-4 pb-16 lg:grid-cols-[235px_minmax(0,1fr)_285px]">
+    <LeftSidebar />
+
+    <section class="space-y-5">
+      <CategoryGrid />
+
+      <section class="rounded-[2rem] border border-white/10 bg-slate-950/35 p-6 shadow-xl backdrop-blur-2xl">
+        <div class="mb-5 flex items-center justify-between gap-4">
+          <h2 class="text-2xl font-black text-white">最新文章</h2>
+
+          <a href="/archive" class="text-sm text-blue-200 transition hover:text-white">
+            查看归档 →
+          </a>
+        </div>
+
+        <div class="space-y-4">
+          {latestPosts.length > 0 ? (
+            latestPosts.map((post) => (
+              <PostStrip
+                title={post.data.title}
+                description={post.data.description}
+                category={getCategoryLabel(post.data.category)}
+                date={formatPostDate(post.data.pubDate)}
+                href={getPostUrl(post)}
+              />
+            ))
+          ) : (
+            <p class="text-sm text-slate-300">
+              暂时还没有文章。
+            </p>
+          )}
+        </div>
+      </section>
+    </section>
+
+    <RightPlugins />
+  </main>
+</BaseLayout>

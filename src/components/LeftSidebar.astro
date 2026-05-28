@@ -1,0 +1,78 @@
+---
+import { siteConfig } from "../data/site.ts";
+
+const avatarBackground = `url('/images/hero-bg.jpg')`;
+---
+
+<aside class="space-y-4">
+  <section class="rounded-[1.8rem] border border-white/10 bg-slate-950/35 p-5 shadow-xl backdrop-blur-2xl">
+    <div class="flex flex-col items-center text-center">
+      <div
+        class="h-24 w-24 rounded-full border-4 border-white/15 shadow-xl"
+        style={`background-image: ${avatarBackground}; background-size: 240%; background-position: center 18%;`}
+      ></div>
+
+      <h2 class="mt-4 text-2xl font-black text-white">
+        d0ucube
+      </h2>
+
+      <p class="mt-2 text-sm leading-7 text-slate-200">
+        正在学习网安，也想写点有意思的东西。
+      </p>
+
+      <div class="mt-5 grid w-full grid-cols-3 gap-2">
+        <a href="#" title="B站" class="flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-sm transition hover:border-blue-300/60 hover:bg-blue-500/20">
+          B
+        </a>
+
+        <a href="#" title="GitHub" class="flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-sm transition hover:border-blue-300/60 hover:bg-blue-500/20">
+          GH
+        </a>
+
+        <a href="#" title="QQ" class="flex h-11 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-sm transition hover:border-blue-300/60 hover:bg-blue-500/20">
+          QQ
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="rounded-[1.8rem] border border-white/10 bg-slate-950/35 p-5 shadow-xl backdrop-blur-2xl">
+    <h2 class="mb-3 text-lg font-black text-white">公告</h2>
+
+    <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <p class="text-sm leading-7 text-slate-200">
+        我的打算：先搭好 Astro 博客主体，再完善文章分类、搜索、日历、音乐播放器和留言板，最后部署到 RackNerd VPS。
+      </p>
+    </div>
+  </section>
+
+  <section class="rounded-[1.8rem] border border-white/10 bg-slate-950/35 p-5 shadow-xl backdrop-blur-2xl">
+    <h2 class="mb-3 text-lg font-black text-white">分类</h2>
+
+    <div class="space-y-2">
+      {siteConfig.categories.map((category) => (
+        <a
+          href={`/categories/${category.slug}`}
+          class="block rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-300/60 hover:bg-blue-500/15"
+        >
+          {category.title}
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="rounded-[1.8rem] border border-white/10 bg-slate-950/35 p-5 shadow-xl backdrop-blur-2xl">
+    <h2 class="mb-3 text-lg font-black text-white">标签</h2>
+
+    <div class="flex flex-wrap gap-2">
+      {siteConfig.tags.map((tag) => (
+        <a
+          href={`/search?q=${tag}`}
+          class="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs text-slate-200 transition hover:border-blue-300/60 hover:bg-blue-500/15"
+        >
+          #{tag}
+        </a>
+      ))}
+    </div>
+  </section>
+</aside>
